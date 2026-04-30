@@ -1,68 +1,86 @@
 #include <SFML/Graphics.hpp>
 
+struct Ball
+{
+  sf::CircleShape shape;
+  sf::Vector2f velocity;
+  float radius;
+};
+
 int main()
 {
-    sf::ContextSettings settings;
-    settings.antialiasingLevel = 8;
+  sf::ContextSettings settings;
+  settings.antialiasingLevel = 8;
 
-    sf::RenderWindow window(sf::VideoMode(1000, 800), "Bouncing Ball");
-    window.setFramerateLimit(60);
+  sf::RenderWindow window(sf::VideoMode(1000, 800), "Bouncing Balls", sf::Style::Default);
+  window.setFramerateLimit(60);
 
-    sf::CircleShape ball(40.f);
-    ball.setFillColor(sf::Color::Magenta);
-    ball.setPosition(100.0f, 100.0f);
+  std::vector<Ball> balls;
+  sf::Clock clock;
 
-    sf::Vector2f velocity(1.5f, 0.8f);
-    sf::Clock clock;
+  while (window.isOpen())
+  {
+    float delta = clock.restart().asSeconds();
+    sf::Event event;
 
-    float speed = 250.0f;
-
-    while (window.isOpen())
+    while (window.pollEvent(event))
     {
-        float delta = clock.restart().asSeconds();
+      if (event.type == sf::Event::Closed)
+        window.close();
 
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
+      if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+      {
+        Ball newBall;
+        newBall.radius = 20.0f;
+        newBall.shape.setRadius(newBall.radius);
+        newBall.shape.setFillColor(sf::Color::Magenta);
 
-        ball.move(velocity * delta * speed);
+        newBall.shape.setOrigin(newBall.radius, newBall.radius);
+        newBall.shape.setPosition(static_cast<float>(event.mouseButton.x), static_cast<float>(event.mouseButton.y));
 
-        sf::FloatRect ballBounds = ball.getGlobalBounds();
-        sf::Vector2u winSize = window.getSize();
-
-        if (ballBounds.left <= 0)
-        {
-            velocity.x = -velocity.x;
-            // snap to left edge
-            ball.setPosition(0, ball.getPosition().y);
-        }
-        else if (ballBounds.left + ballBounds.width >= winSize.x)
-        {
-            velocity.x = -velocity.x;
-            // snap to right edge
-            ball.setPosition(winSize.x - ballBounds.width, ball.getPosition().y);
-        }
-
-        if (ballBounds.top <= 0)
-        {
-            velocity.y = -velocity.y;
-            // snap to top
-            ball.setPosition(ball.getPosition().x, 0);
-        }
-        else if (ballBounds.top + ballBounds.height >= winSize.y)
-        {
-            velocity.y = -velocity.y;
-            // snap to bottom
-            ball.setPosition(ball.getPosition().x, winSize.y - ballBounds.height);
-        }
-
-        window.clear();
-        window.draw(ball);
-        window.display();
+        newBall.velocity = sf::Vector2f(100.0f, 100.0f);
+        balls.push_back(newBall);
+      }
     }
 
-    return 0;
+    for (size_t i = 0; i < balls.size(); i++)
+    {
+      balls[i].shape.move(balls[i].velocity * delta);
+
+      // wall collisions
+      sf::Vector2f pos = balls[i].shape.getPosition();
+      float radi = balls[i].radius;
+
+      if (pos.x - radi < 0)
+      {
+        balls[i].velocity.x *= -1;
+        balls[i].shape.setPosition(radi, pos.y);
+      }
+
+      if (pos.x + radi > 1000)
+      {
+        balls[i].velocity.x *= -1;
+        balls[i].shape.setPosition(1000 - radi, pos.y);
+      }
+
+      if (pos.y - radi < 0)
+      {
+        balls[i].velocity.y *= -1;
+        balls[i].shape.setPosition(pos.x, radi);
+      }
+
+      if (pos.y + radi > 800)
+      {
+        balls[i].velocity.y *= -1;
+        balls[i].shape.setPosition(pos.x, 800 - radi);
+      }
+    }
+
+    window.clear();
+    for (auto &b : balls)
+      window.draw(b.shape);
+    window.display();
+  }
+
+  return 0;
 }
