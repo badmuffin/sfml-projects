@@ -1,4 +1,7 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Color.hpp>
+#include <SFML/System/Vector2.hpp>
+#include <cstddef>
 
 struct Ball {
   sf::CircleShape shape;
@@ -68,7 +71,23 @@ int main() {
         balls[i].shape.setPosition(pos.x, 800 - radi);
       }
 
-      
+      // ball to ball collisions
+      for (size_t j = i + 1; j < balls.size(); j++) {
+        sf::Vector2f posA = balls[i].shape.getPosition();
+        sf::Vector2f posB = balls[j].shape.getPosition();
+
+        sf::Vector2f diffAnB = posA - posB; // ans: d(x, y)
+
+        // Pythagoras theorem: d^2 = (x2 - x1)^2 + (y2 - y1)^2
+        float distBetweenBothPointsInSq =
+            diffAnB.x * diffAnB.x + diffAnB.y * diffAnB.y;
+        float radiusSum = balls[i].radius + balls[j].radius;
+
+        if (distBetweenBothPointsInSq <= radiusSum * radiusSum) {
+          balls[i].shape.setFillColor(sf::Color::Cyan);
+          balls[j].shape.setFillColor(sf::Color::Cyan);
+        }
+      }
     }
 
     window.clear();
