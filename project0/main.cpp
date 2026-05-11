@@ -1,15 +1,18 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <cmath>
 #include <cstddef>
 
-struct Ball {
+struct Ball
+{
   sf::CircleShape shape;
   sf::Vector2f velocity;
   float radius;
 };
 
-int main() {
+int main()
+{
   sf::ContextSettings settings;
   settings.antialiasingLevel = 8;
 
@@ -20,16 +23,19 @@ int main() {
   std::vector<Ball> balls;
   sf::Clock clock;
 
-  while (window.isOpen()) {
+  while (window.isOpen())
+  {
     float delta = clock.restart().asSeconds();
     sf::Event event;
 
-    while (window.pollEvent(event)) {
+    while (window.pollEvent(event))
+    {
       if (event.type == sf::Event::Closed)
         window.close();
 
       if (event.type == sf::Event::MouseButtonPressed &&
-          event.mouseButton.button == sf::Mouse::Left) {
+          event.mouseButton.button == sf::Mouse::Left)
+      {
         Ball newBall;
         newBall.radius = 20.0f;
         newBall.shape.setRadius(newBall.radius);
@@ -44,35 +50,41 @@ int main() {
       }
     }
 
-    for (size_t i = 0; i < balls.size(); i++) {
+    for (size_t i = 0; i < balls.size(); i++)
+    {
       balls[i].shape.move(balls[i].velocity * delta);
 
       // wall collisions
       sf::Vector2f pos = balls[i].shape.getPosition();
       float radi = balls[i].radius;
 
-      if (pos.x - radi < 0) {
+      if (pos.x - radi < 0)
+      {
         balls[i].velocity.x *= -1;
         balls[i].shape.setPosition(radi, pos.y);
       }
 
-      if (pos.x + radi > 1000) {
+      if (pos.x + radi > 1000)
+      {
         balls[i].velocity.x *= -1;
         balls[i].shape.setPosition(1000 - radi, pos.y);
       }
 
-      if (pos.y - radi < 0) {
+      if (pos.y - radi < 0)
+      {
         balls[i].velocity.y *= -1;
         balls[i].shape.setPosition(pos.x, radi);
       }
 
-      if (pos.y + radi > 800) {
+      if (pos.y + radi > 800)
+      {
         balls[i].velocity.y *= -1;
         balls[i].shape.setPosition(pos.x, 800 - radi);
       }
 
       // ball to ball collisions
-      for (size_t j = i + 1; j < balls.size(); j++) {
+      for (size_t j = i + 1; j < balls.size(); j++)
+      {
         sf::Vector2f posA = balls[i].shape.getPosition();
         sf::Vector2f posB = balls[j].shape.getPosition();
 
@@ -83,9 +95,28 @@ int main() {
             diffAnB.x * diffAnB.x + diffAnB.y * diffAnB.y;
         float radiusSum = balls[i].radius + balls[j].radius;
 
-        if (distBetweenBothPointsInSq <= radiusSum * radiusSum) {
-          balls[i].shape.setFillColor(sf::Color::Cyan);
-          balls[j].shape.setFillColor(sf::Color::Cyan);
+        // main logic for collision detection
+        if (distBetweenBothPointsInSq <= radiusSum * radiusSum)
+        {
+          float distBetweenBothPoints = std::sqrt(distBetweenBothPointsInSq);
+
+          // Avoid division by zero if balls are perfectly on top of each other
+          if (distBetweenBothPoints == 0)
+            continue;
+
+          sf::Vector2f normal = diffAnB / distBetweenBothPoints;
+
+          // are the balls moving toward/away from each other - relative velocity
+          sf::Vector2f relVelocity = balls[i].velocity - balls[j].velocity;
+
+          // total velocity along the collision direction i.e., normal
+          float velocityAlongNormal = relVelocity.x * normal.x + relVelocity.y * normal.y;
+
+          if (velocityAlongNormal > 0)
+            continue;
+
+          balls[i].velocity = -balls[i].velocity;
+          balls[j].velocity = -balls[j].velocity;
         }
       }
     }
