@@ -39,7 +39,10 @@ int main()
         Ball newBall;
         newBall.radius = 20.0f;
         newBall.shape.setRadius(newBall.radius);
-        newBall.shape.setFillColor(sf::Color::Magenta);
+        newBall.shape.setFillColor(sf::Color(
+            rand() % 256,
+            rand() % 256,
+            rand() % 256));
 
         newBall.shape.setOrigin(newBall.radius, newBall.radius);
         newBall.shape.setPosition(static_cast<float>(event.mouseButton.x),
@@ -104,9 +107,10 @@ int main()
           if (distBetweenBothPoints == 0)
             continue;
 
+          // collision normal - represents the direction from one ball center to other
           sf::Vector2f normal = diffAnB / distBetweenBothPoints;
 
-          // are the balls moving toward/away from each other - relative velocity
+          // are the balls moving toward/away from each other and how fast.. - relative velocity
           sf::Vector2f relVelocity = balls[i].velocity - balls[j].velocity;
 
           // total velocity along the collision direction i.e., normal
@@ -115,8 +119,8 @@ int main()
           if (velocityAlongNormal > 0)
             continue;
 
-          balls[i].velocity = -balls[i].velocity;
-          balls[j].velocity = -balls[j].velocity;
+          balls[i].velocity -= velocityAlongNormal * normal;
+          balls[j].velocity += velocityAlongNormal * normal;
         }
       }
     }
