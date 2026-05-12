@@ -110,15 +110,20 @@ int main()
           // collision normal - represents the direction from one ball center to other
           sf::Vector2f normal = diffAnB / distBetweenBothPoints;
 
-          // are the balls moving toward/away from each other and how fast.. - relative velocity
+          // Relative velocity between the two balls
+          // Describes how ball A is moving relative to ball B
           sf::Vector2f relVelocity = balls[i].velocity - balls[j].velocity;
 
-          // total velocity along the collision direction i.e., normal
+          // Project relative velocity onto the collision normal using dot product
+          // This extracts only the velocity component along the collision direction
           float velocityAlongNormal = relVelocity.x * normal.x + relVelocity.y * normal.y;
 
+          // Positive value => balls are already separating
+          // Negative value => balls are moving toward each other
           if (velocityAlongNormal > 0)
             continue;
 
+          // transferring the velocity component along the collision direction from one ball to the other.
           balls[i].velocity -= velocityAlongNormal * normal;
           balls[j].velocity += velocityAlongNormal * normal;
         }
