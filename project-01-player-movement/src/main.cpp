@@ -3,10 +3,11 @@
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/WindowStyle.hpp>
 
 int main() {
   sf::RenderWindow window(sf::VideoMode(1080, 800), "Top down player",
-                          sf::Style::Resize);
+                          sf::Style::Default);
   sf::Clock clock;
   Player player;
 

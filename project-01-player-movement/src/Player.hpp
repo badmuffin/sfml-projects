@@ -4,6 +4,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <cmath>
 
 class Player {
 private:
@@ -18,17 +19,33 @@ public:
     speed = 200.0f;
   }
 
+  sf::Vector2f normalizeDirection(sf::Vector2f direction) {
+    float x = direction.x;
+    float y = direction.y;
+    float length = std::sqrt(x * x + y * y);
+
+    if (length != 0) {
+      direction.x /= length;
+      direction.y /= length;
+    }
+
+    return direction;
+  }
+
   void update(float deltaTime) {
-    float velocity = speed * deltaTime;
+    sf::Vector2f direction = {0.0f, 0.0f};
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-      body.move(0, -velocity);
+      direction.y -= 1;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-      body.move(-velocity, 0);
+      direction.x -= 1;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-      body.move(0, velocity);
+      direction.y += 1;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-      body.move(velocity, 0);
+      direction.x += 1;
+
+    sf::Vector2f velocity = speed * deltaTime * normalizeDirection(direction);
+    body.move(velocity);
   }
 
   void draw(sf::RenderWindow &window) { window.draw(body); }
