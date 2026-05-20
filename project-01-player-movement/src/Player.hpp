@@ -5,17 +5,23 @@
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <cmath>
+#include <iostream>
 
 class Player {
 private:
   float speed;
-  sf::RectangleShape body;
+  sf::Texture texture;
+  sf::Sprite body;
 
 public:
   Player() {
+    if (!texture.loadFromFile("assets/idle/idle-down.png")) {
+      std::cout << "Failed to load the sprite.\n";
+    }
+
+    body.setTexture(texture);
     body.setPosition(0, 0);
-    body.setSize(sf::Vector2f(50.f, 50.f));
-    body.setFillColor(sf::Color::White);
+    body.setScale(3.0f, 3.0f);
     speed = 200.0f;
   }
 
