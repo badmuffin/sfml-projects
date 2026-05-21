@@ -2,27 +2,73 @@
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <cmath>
 #include <iostream>
+#include <map>
+#include <string>
+#include <vector>
+
+enum AnimationState {
+  idleDown,
+  idleLeft,
+  idleRight,
+  idleUp,
+  runDown,
+  runLeft,
+  runRight,
+  runUp
+};
 
 class Player {
 private:
   float speed;
-  sf::Texture texture;
+
   sf::Sprite body;
+
+  std::map<AnimationState, std::vector<sf::Texture>> animations;
+  AnimationState currAnimState;
+  int currFrame;
+
+  float animationTimer;
+  float frameDuration;
 
 public:
   Player() {
-    if (!texture.loadFromFile("assets/idle/idle-down.png")) {
-      std::cout << "Failed to load the sprite.\n";
-    }
+    currAnimState = idleDown;
+    currFrame = 0;
+    animationTimer = 0.0f;
+    frameDuration = 0.0f;
 
-    body.setTexture(texture);
     body.setPosition(0, 0);
     body.setScale(3.0f, 3.0f);
     speed = 200.0f;
+  }
+
+  void loadAnimations() {
+    // load idle textures
+    {
+      sf::Texture texture;
+      texture.loadFromFile("assets/idle/idle-down.png");
+      animations[idleDown].push_back(texture);
+    }
+    {
+      sf::Texture texture;
+      texture.loadFromFile("assets/idle/idle-left.png");
+      animations[idleLeft].push_back(texture);
+    }
+    {
+      sf::Texture texture;
+      texture.loadFromFile("assets/idle/idle-right.png");
+      animations[idleRight].push_back(texture);
+    }
+    {
+      sf::Texture texture;
+      texture.loadFromFile("assets/idle/idle-up.png");
+      animations[idleUp].push_back(texture);
+    }
   }
 
   sf::Vector2f normalizeDirection(sf::Vector2f direction) {
