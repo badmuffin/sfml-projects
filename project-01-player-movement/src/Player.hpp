@@ -6,7 +6,6 @@
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <cmath>
-#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
@@ -40,7 +39,7 @@ public:
     currAnimState = idleDown;
     currFrame = 0;
     animationTimer = 0.0f;
-    frameDuration = 0.0f;
+    frameDuration = 0.1f;
 
     loadAnimations();
 
@@ -112,17 +111,65 @@ public:
     return direction;
   }
 
+  void updateAnimation(float deltaTime) {
+    animationTimer += deltaTime;
+
+    if (animationTimer >= frameDuration) {
+      animationTimer = 0.0f;
+
+      currFrame++;
+      currFrame %= animations[currAnimState].size();
+
+      body.setTexture(animations[currAnimState][currFrame]);
+    }
+  }
+
   void update(float deltaTime) {
     sf::Vector2f direction = {0.0f, 0.0f};
+    bool isMoving = false;
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-      direction.y -= 1;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-      direction.x -= 1;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-      direction.y += 1;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-      direction.x += 1;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+      direction.y -= 1.0f;
+      currAnimState = runUp;
+      isMoving = true;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+      direction.x -= 1.0f;
+      currAnimState = runLeft;
+      isMoving = true;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+      direction.y += 1.0f;
+      currAnimState = runDown;
+      isMoving = true;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+      direction.x += 1.0f;
+      currAnimState = runRight;
+      isMoving = true;
+    }
+
+    if (!isMoving) {
+      if (currAnimState == runDown)
+        currAnimState = idleDown;
+
+      else if (currAnimState == runLeft)
+        currAnimState = idleLeft;
+
+      else if (currAnimState == runRight)
+        currAnimState = idleRight;
+
+      else if (currAnimState == runUp)
+        currAnimState = idleUp;
+
+      currFrame = 0;
+      body.setTexture(animations[currAnimState][0]);
+    } else {
+      updateAnimation(deltaTime);
+    }
 
     sf::Vector2f velocity = speed * deltaTime * normalizeDirection(direction);
     body.move(velocity);
