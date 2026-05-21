@@ -42,6 +42,9 @@ public:
     animationTimer = 0.0f;
     frameDuration = 0.0f;
 
+    loadAnimations();
+
+    body.setTexture(animations[idleDown][0]);
     body.setPosition(0, 0);
     body.setScale(3.0f, 3.0f);
     speed = 200.0f;
@@ -68,6 +71,31 @@ public:
       sf::Texture texture;
       texture.loadFromFile("assets/idle/idle-up.png");
       animations[idleUp].push_back(texture);
+    }
+
+    // load other frames
+    for (int i = 1; i <= 8; i++) {
+      sf::Texture texture;
+      texture.loadFromFile("assets/runDown/" + std::to_string(i) + ".png");
+      animations[runDown].push_back(texture);
+    }
+
+    for (int i = 1; i <= 8; i++) {
+      sf::Texture texture;
+      texture.loadFromFile("assets/runLeft/" + std::to_string(i) + ".png");
+      animations[runLeft].push_back(texture);
+    }
+
+    for (int i = 1; i <= 8; i++) {
+      sf::Texture texture;
+      texture.loadFromFile("assets/runRight/" + std::to_string(i) + ".png");
+      animations[runRight].push_back(texture);
+    }
+
+    for (int i = 1; i <= 8; i++) {
+      sf::Texture texture;
+      texture.loadFromFile("assets/runUp/" + std::to_string(i) + ".png");
+      animations[runUp].push_back(texture);
     }
   }
 
